@@ -17,7 +17,7 @@ abstract class _Kouch {
   void init({required String host});
 
   /// To obtain session and authorization data.
-  /// * [type] : The type of authentication required.
+  /// * [auth] : The type of authentication required.
   Future<Map<String, dynamic>> authorize({required KouchAuth auth});
 
   /// To obtain information about the authenticated user, including a User
@@ -69,17 +69,21 @@ class Kouch implements _Kouch {
   /// To get the headers based on the authenticate method used.
   Map<String, String> _authHeaders() {
     assert(_auth != null, "You must authenticate before accessing this method");
+    final Map<String, String> header = {
+      KouchParameters.contentType: KouchParameters.applicationJson,
+    };
     if (_auth is KouchCookieAuth) {
-      return {
-        KouchParameters.contentType: KouchParameters.applicationJson,
-        KouchParameters.cookie: (_auth as KouchCookieAuth).cookie ?? "",
-      };
+      header[KouchParameters.cookie] = (_auth as KouchCookieAuth).cookie ?? "";
+      return header;
     }
-    return {};
+    header[KouchParameters.authorization] =
+        "${KouchParameters.bearer} ${(_auth as KouchJWTAuth).token}";
+    return header;
   }
 
   @override
   void deInit() {
     _host = null;
+    _auth = null;
   }
 }

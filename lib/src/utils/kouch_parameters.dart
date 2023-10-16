@@ -7,4 +7,6 @@ class KouchParameters {
   static String get contentType => "Content-Type";
   static String get applicationJson => "application/json";
   static String get applicationForm => "application/x-www-form-urlencoded";
+  static String get authorization => "Authorization";
+  static String get bearer => "Bearer";
 }

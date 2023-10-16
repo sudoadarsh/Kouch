@@ -13,6 +13,7 @@ import 'package:kouch/src/utils/kouch_parameters.dart';
 abstract class KouchAuth {
   /// Authenticate.
   Future<Map<String, dynamic>> authenticate(String host);
+  const KouchAuth();
 }
 
 final class KouchCookieAuth implements KouchAuth {
@@ -55,4 +56,25 @@ final class KouchCookieAuth implements KouchAuth {
   }
 }
 
-// final class KouchJWTAuth implements KouchAuth {}
+final class KouchJWTAuth implements KouchAuth {
+  /// The JWT token.
+  final String token;
+  const KouchJWTAuth({required this.token});
+
+  @override
+  Future<Map<String, dynamic>> authenticate(String host) async {
+    // Request headers.
+    final Map<String, String> headers = {
+      KouchParameters.contentType: KouchParameters.applicationJson,
+      KouchParameters.authorization: "${KouchParameters.bearer} $token",
+    };
+    final http.Response response = await http.get(
+      Uri.parse(host + KouchEndpoints.session),
+      headers: headers,
+    );
+    if (response.statusCode != 200) {
+      throw KouchAuthenticateException(response.body);
+    }
+    return jsonDecode(response.body);
+  }
+}
