@@ -1,2 +1,2 @@
 # Kouch
-A Flutter Plugin to work with CouchDB API.
+A Dart Plugin to work with CouchDB API.
