@@ -12,12 +12,13 @@ import 'package:kouch/src/utils/kouch_parameters.dart';
 /// 1. [KouchCookieAuth]
 /// 2. [KouchJWTAuth]
 abstract class KouchAuth {
+  const KouchAuth();
+  
   /// Authenticate.
   Future<KouchAuthInfo> authenticate(String host);
 
   /// To get the authentication headers for future CouchDB api calls.
   Map<String, String> authHeaders();
-  const KouchAuth();
 }
 
 final class KouchCookieAuth implements KouchAuth {
@@ -65,10 +66,12 @@ final class KouchCookieAuth implements KouchAuth {
 
   /// To get the headers based on the authenticate method used.
   @override
-  Map<String, String> authHeaders() => {
+  Map<String, String> authHeaders() {
+    return {
         KouchParameters.contentType: KouchParameters.applicationJson,
         KouchParameters.cookie: cookie ?? "",
       };
+  }
 
   Future<Map<String, dynamic>> _userInfo(String host) async {
     // Request headers.

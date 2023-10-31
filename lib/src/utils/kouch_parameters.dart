@@ -10,4 +10,7 @@ class KouchParameters {
   static String get applicationForm => "application/x-www-form-urlencoded";
   static String get authorization => "Authorization";
   static String get bearer => "Bearer";
+  static String get q => "q";
+  static String get n => "n";
+  static String get partitioned => "partitioned";
 }
