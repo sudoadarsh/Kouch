@@ -10,7 +10,9 @@ abstract class _KouchDatabase {
 class KouchDatabase implements _KouchDatabase {
   final String host;
   final KouchAuth auth;
-  const KouchDatabase(this.host, this.auth);
+  /// The name of the database.
+  final String name;
+  const KouchDatabase(this.host, this.auth, {required this.name});
 
   @override
   Map<String, dynamic> create() {

@@ -57,7 +57,7 @@ final class KouchCookieAuth implements KouchAuth {
     cookie = response.headers[KouchParameters.setCookie];
     // Decode the response body.
     final Map<String, dynamic> decodedBody = jsonDecode(response.body);
-    if (decodedBody[KouchParameters.ok] == "true") {
+    if (decodedBody[KouchParameters.ok]) {
       return KouchAuthInfo.fromJson(await _userInfo(host));
     }
     throw KouchAuthenticateException(response.body);

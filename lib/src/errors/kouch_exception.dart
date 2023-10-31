@@ -7,3 +7,11 @@ final class KouchAuthenticateException extends KouchException {
   @override
   String toString() => error;
 }
+
+final class KouchDatabaseException extends KouchException {
+  final String error;
+  KouchDatabaseException(this.error);
+
+  @override
+  String toString() => error;
+}
