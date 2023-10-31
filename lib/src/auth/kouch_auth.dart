@@ -13,6 +13,8 @@ import 'package:kouch/src/utils/kouch_parameters.dart';
 abstract class KouchAuth {
   /// Authenticate.
   Future<Map<String, dynamic>> authenticate(String host);
+  /// To get the authentication headers for future CouchDB api calls.
+  Map<String, String> authHeaders();
   const KouchAuth();
 }
 
@@ -54,6 +56,13 @@ final class KouchCookieAuth implements KouchAuth {
     if (cookie == null) throw KouchAuthenticateException("Invalid Cookie");
     return jsonDecode(response.body);
   }
+
+  /// To get the headers based on the authenticate method used.
+  @override
+  Map<String, String> authHeaders() => {
+      KouchParameters.contentType: KouchParameters.applicationJson,
+      KouchParameters.cookie: cookie ?? "",
+    };
 }
 
 final class KouchJWTAuth implements KouchAuth {
@@ -76,5 +85,10 @@ final class KouchJWTAuth implements KouchAuth {
       throw KouchAuthenticateException(response.body);
     }
     return jsonDecode(response.body);
+  }
+
+  @override
+  Map<String, String> authHeaders() {
+    throw UnimplementedError();
   }
 }

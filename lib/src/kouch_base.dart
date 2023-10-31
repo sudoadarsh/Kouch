@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:kouch/src/auth/kouch_auth.dart';
+import 'package:kouch/src/database/kouch_database.dart';
 import 'package:kouch/src/errors/kouch_exception.dart';
 import 'package:kouch/src/utils/kouch_endpoints.dart';
-import 'package:kouch/src/utils/kouch_parameters.dart';
 import 'package:http/http.dart' as http;
 
 /// An Instance of [Kouch].
@@ -24,6 +24,10 @@ abstract class _Kouch {
   /// Context Object, the authentication method and database that were used,
   /// and a list of configured authentication handlers on the server.
   Future<Map<String, dynamic>> userInfo();
+
+  /// Instance of CouchDB database.
+  /// * [name] : The name of the database.
+  KouchDatabase database(String name);
 
   /// De-initializes Kouch.
   void deInit();
@@ -53,7 +57,7 @@ class Kouch implements _Kouch {
   Future<Map<String, dynamic>> userInfo() async {
     assert(_host != null);
     // Request headers.
-    final Map<String, String> headers = _authHeaders();
+    final Map<String, String>? headers = _auth?.authHeaders();
     final http.Response response = await http.get(
       Uri.parse(_host! + KouchEndpoints.session),
       headers: headers,
@@ -64,21 +68,11 @@ class Kouch implements _Kouch {
     return jsonDecode(response.body);
   }
 
-  // Private methods.
-
-  /// To get the headers based on the authenticate method used.
-  Map<String, String> _authHeaders() {
-    assert(_auth != null, "You must authenticate before accessing this method");
-    final Map<String, String> header = {
-      KouchParameters.contentType: KouchParameters.applicationJson,
-    };
-    if (_auth is KouchCookieAuth) {
-      header[KouchParameters.cookie] = (_auth as KouchCookieAuth).cookie ?? "";
-      return header;
-    }
-    header[KouchParameters.authorization] =
-        "${KouchParameters.bearer} ${(_auth as KouchJWTAuth).token}";
-    return header;
+  @override
+  KouchDatabase database(String name) {
+    assert(_host != null);
+    assert(_host != null);
+    return KouchDatabase(_host!, _auth!);
   }
 
   @override
