@@ -1,10 +1,6 @@
-import 'dart:convert';
-
 import 'package:kouch/src/auth/kouch_auth.dart';
 import 'package:kouch/src/database/kouch_database.dart';
-import 'package:kouch/src/errors/kouch_exception.dart';
-import 'package:kouch/src/utils/kouch_endpoints.dart';
-import 'package:http/http.dart' as http;
+import 'package:kouch/src/models/kouch_auth_info.dart';
 
 /// An Instance of [Kouch].
 ///
@@ -18,12 +14,7 @@ abstract class _Kouch {
 
   /// To obtain session and authorization data.
   /// * [auth] : The type of authentication required.
-  Future<Map<String, dynamic>> authorize({required KouchAuth auth});
-
-  /// To obtain information about the authenticated user, including a User
-  /// Context Object, the authentication method and database that were used,
-  /// and a list of configured authentication handlers on the server.
-  Future<Map<String, dynamic>> userInfo();
+  Future<KouchAuthInfo> authorize({required KouchAuth auth});
 
   /// Instance of CouchDB database.
   /// * [name] : The name of the database.
@@ -47,25 +38,10 @@ class Kouch implements _Kouch {
   }
 
   @override
-  Future<Map<String, dynamic>> authorize({required KouchAuth auth}) async {
+  Future<KouchAuthInfo> authorize({required KouchAuth auth}) async {
     assert(_host != null);
     _auth = auth;
     return await auth.authenticate(_host!);
-  }
-
-  @override
-  Future<Map<String, dynamic>> userInfo() async {
-    assert(_host != null);
-    // Request headers.
-    final Map<String, String>? headers = _auth?.authHeaders();
-    final http.Response response = await http.get(
-      Uri.parse(_host! + KouchEndpoints.session),
-      headers: headers,
-    );
-    if (response.statusCode != 200) {
-      throw KouchAuthenticateException(response.body);
-    }
-    return jsonDecode(response.body);
   }
 
   @override

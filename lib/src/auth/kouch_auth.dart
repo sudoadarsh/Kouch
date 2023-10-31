@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:kouch/src/errors/kouch_exception.dart';
+import 'package:kouch/src/models/kouch_auth_info.dart';
 import 'package:kouch/src/utils/kouch_endpoints.dart';
 import 'package:kouch/src/utils/kouch_parameters.dart';
 
@@ -12,7 +13,8 @@ import 'package:kouch/src/utils/kouch_parameters.dart';
 /// 2. [KouchJWTAuth]
 abstract class KouchAuth {
   /// Authenticate.
-  Future<Map<String, dynamic>> authenticate(String host);
+  Future<KouchAuthInfo> authenticate(String host);
+
   /// To get the authentication headers for future CouchDB api calls.
   Map<String, String> authHeaders();
   const KouchAuth();
@@ -31,7 +33,7 @@ final class KouchCookieAuth implements KouchAuth {
   String? cookie;
 
   @override
-  Future<Map<String, dynamic>> authenticate(String host) async {
+  Future<KouchAuthInfo> authenticate(String host) async {
     // Request headers.
     final Map<String, String> headers = {
       KouchParameters.contentType: KouchParameters.applicationForm,
@@ -53,16 +55,32 @@ final class KouchCookieAuth implements KouchAuth {
     }
     // Get the session cookie from the response headers.
     cookie = response.headers[KouchParameters.setCookie];
-    if (cookie == null) throw KouchAuthenticateException("Invalid Cookie");
-    return jsonDecode(response.body);
+    // Decode the response body.
+    final Map<String, dynamic> decodedBody = jsonDecode(response.body);
+    if (decodedBody[KouchParameters.ok] == "true") {
+      return KouchAuthInfo.fromJson(await _userInfo(host));
+    }
+    throw KouchAuthenticateException(response.body);
   }
 
   /// To get the headers based on the authenticate method used.
   @override
   Map<String, String> authHeaders() => {
-      KouchParameters.contentType: KouchParameters.applicationJson,
-      KouchParameters.cookie: cookie ?? "",
-    };
+        KouchParameters.contentType: KouchParameters.applicationJson,
+        KouchParameters.cookie: cookie ?? "",
+      };
+
+  Future<Map<String, dynamic>> _userInfo(String host) async {
+    // Request headers.
+    final http.Response response = await http.get(
+      Uri.parse(host + KouchEndpoints.session),
+      headers: authHeaders(),
+    );
+    if (response.statusCode != 200) {
+      throw KouchAuthenticateException(response.body);
+    }
+    return jsonDecode(response.body);
+  }
 }
 
 final class KouchJWTAuth implements KouchAuth {
@@ -71,20 +89,21 @@ final class KouchJWTAuth implements KouchAuth {
   const KouchJWTAuth({required this.token});
 
   @override
-  Future<Map<String, dynamic>> authenticate(String host) async {
-    // Request headers.
-    final Map<String, String> headers = {
-      KouchParameters.contentType: KouchParameters.applicationJson,
-      KouchParameters.authorization: "${KouchParameters.bearer} $token",
-    };
-    final http.Response response = await http.get(
-      Uri.parse(host + KouchEndpoints.session),
-      headers: headers,
-    );
-    if (response.statusCode != 200) {
-      throw KouchAuthenticateException(response.body);
-    }
-    return jsonDecode(response.body);
+  Future<KouchAuthInfo> authenticate(String host) async {
+    // // Request headers.
+    // final Map<String, String> headers = {
+    //   KouchParameters.contentType: KouchParameters.applicationJson,
+    //   KouchParameters.authorization: "${KouchParameters.bearer} $token",
+    // };
+    // final http.Response response = await http.get(
+    //   Uri.parse(host + KouchEndpoints.session),
+    //   headers: headers,
+    // );
+    // if (response.statusCode != 200) {
+    //   throw KouchAuthenticateException(response.body);
+    // }
+    // return jsonDecode(response.body);
+    throw UnimplementedError();
   }
 
   @override

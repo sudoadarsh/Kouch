@@ -1,4 +1,5 @@
 class KouchParameters {
+  static String get ok => "ok";
   static String get next => "next";
   static String get name => "name";
   static String get password => "password";
