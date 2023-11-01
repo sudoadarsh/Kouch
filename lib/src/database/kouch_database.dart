@@ -14,6 +14,7 @@ abstract class _KouchDatabase {
   Future<void> create({int shards, int replicas, bool partitioned});
 
   /// Deletes the database and all the documents and attachments contained within it.
+  /// Throws [KouchDatabaseException] if fails to delete the database.
   Future<void> delete();
 }
 

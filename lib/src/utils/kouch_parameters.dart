@@ -13,4 +13,11 @@ class KouchParameters {
   static String get q => "q";
   static String get n => "n";
   static String get partitioned => "partitioned";
+  static String get skip => "skip";
+  static String get startKey => "startkey";
+  static String get startKeyAlias => "start_key";
+  static String get limit => "limit";
+  static String get endKeyAlias => "end_key";
+  static String get endKey => "endkey";
+  static String get descending => "descending";
 }
